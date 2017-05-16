@@ -19,7 +19,7 @@ class Trie:
         valid = False
         for s in possible_splits:
             split = word[:s]
-            if split in self.chars:
+            if split in self.alphabet:
                 valid |= self.subtries[split].add_word(word[s:])
         return valid
 
@@ -27,13 +27,14 @@ class Trie:
         for w in words:
             self.add_word(w)
 
-    def get_all_words(self):
-        return sorted(self._get_all_words(), key=len, reverse=True)
+    def get_all_words(self, with_capitalization):
+        return sorted(self._get_all_words(with_capitalization), key=len, reverse=True)
 
-    def _get_all_words(self, prefix=""):
-        words = [prefix] if self.is_word else []
+    def _get_all_words(self, with_capitalization, prefix=""):
+        words = {prefix} if self.is_word else set()
         for letter, trie in self.subtries.items():
-            words.extend(trie._get_all_words(prefix+letter))
+            suffix = letter.capitalize() if with_capitalization else letter
+            words.update(trie._get_all_words(with_capitalization, prefix+suffix))
         return words
                 
 
@@ -42,7 +43,7 @@ def main(word_file):
     words = read_words(word_file)
     trie = Trie(elements)
     trie.add_words(words)
-    print(trie.get_all_words()[:10])
+    print(trie.get_all_words(False)[:10])
 
 
 def read_elements():
